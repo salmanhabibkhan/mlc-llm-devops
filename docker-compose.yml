@@ -1,0 +1,144 @@
+version: '3.8'
+
+# MLC-LLM Development Environment
+# Docker Compose configuration for local development
+
+services:
+  # Main development service
+  mlc-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.11"
+        CMAKE_VERSION: "3.28.1"
+      cache_from:
+        - mlc-llm-dev:latest
+    image: mlc-llm-dev:local
+    container_name: mlc-llm-dev
+    hostname: mlc-dev
+    
+    # Interactive terminal
+    stdin_open: true
+    tty: true
+    
+    # Working directory
+    working_dir: /workspace
+    
+    # Volume mounts
+    volumes:
+      # Source code
+      - .:/workspace
+      # Persistent cache
+      - mlc-cache:/root/.cache
+      - mlc-build:/workspace/build
+      # Shared SSH keys (for git operations)
+      - ~/.ssh:/root/.ssh:ro
+      # Shared git config
+      - ~/.gitconfig:/root/.gitconfig:ro
+    
+    # Environment variables
+    environment:
+      - MLC_LLM_SOURCE_DIR=/workspace
+      - PYTHONPATH=/workspace/python
+      - CUDA_VISIBLE_DEVICES=0
+      - BUILD_MODE=false
+    
+    # Port mappings
+    ports:
+      - "8000:8000"   # REST API server
+      - "8080:8080"   # Alternative port
+      - "6006:6006"   # TensorBoard
+    
+    # GPU support (requires nvidia-docker)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Resource limits (optional)
+    # mem_limit: 16g
+    # cpus: 8
+    
+    # Default command
+    command: /bin/bash
+  
+  # Build service (for CI/CD simulation)
+  mlc-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.11"
+    image: mlc-llm-dev:local
+    container_name: mlc-llm-build
+    
+    volumes:
+      - .:/workspace
+      - ./dist:/output
+    
+    environment:
+      - BUILD_MODE=true
+      - MLC_LLM_SOURCE_DIR=/workspace
+    
+    # Automatically exit after build
+    restart: "no"
+  
+  # Test runner service
+  mlc-test:
+    image: mlc-llm-dev:local
+    container_name: mlc-llm-test
+    
+    volumes:
+      - .:/workspace
+      - mlc-test-cache:/root/.cache
+      - ./test-results:/workspace/test-results
+    
+    environment:
+      - PYTHONPATH=/workspace/python
+      - PYTEST_ARGS=-v --cov=mlc_llm
+    
+    working_dir: /workspace
+    
+    command: >
+      bash -c "
+        pip install -e python/ &&
+        pytest tests/ $$PYTEST_ARGS
+      "
+    
+    # Don't restart on failure
+    restart: "no"
+
+# Named volumes for persistence
+volumes:
+  # Development cache (pip, cmake, etc.)
+  mlc-cache:
+    driver: local
+    name: mlc-llm-cache
+  
+  # Build artifacts
+  mlc-build:
+    driver: local
+    name: mlc-llm-build
+  
+  # Test cache
+  mlc-test-cache:
+    driver: local
+    name: mlc-llm-test-cache
+
+# Network configuration
+networks:
+  default:
+    name: mlc-network
+    driver: bridge
