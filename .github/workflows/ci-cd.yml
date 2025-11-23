@@ -303,28 +303,11 @@ jobs:
             -DUSE_OPENCL=OFF \
             -DUSE_VULKAN=ON
           cmake --build . --parallel $(nproc)
-      - name: Configure MLC (Windows)
+    # ---------- Windows: Skip C++ build ----------
+      - name: Skip C++ Build on Windows
         if: runner.os == 'Windows'
-        shell: powershell
         run: |
-          cd mlc-official
-          if (!(Test-Path build-window)) { mkdir build-window }
-          cd build-window
-          cmake .. -G Ninja `
-            -DTVM_SOURCE_DIR=../3rdparty/tvm `
-            -DUSE_CUDA=OFF `
-            -DUSE_ROCM=OFF `
-            -DUSE_OPENCL=OFF `
-            -DUSE_VULKAN=OFF `
-            -DUSE_METAL=OFF `
-            -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build MLC-LLM Libraries (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          cd mlc-official/build-window
-          cmake --build . --parallel $env:NUMBER_OF_PROCESSORS
+          echo "Skipping C++ build — TVM does not support Windows GCC/MinGW. Building Python wheel only."
 
       # ---------- Build Python wheels ----------
       - name: Build Python Wheel
