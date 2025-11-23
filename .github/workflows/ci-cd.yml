@@ -141,10 +141,9 @@ jobs:
       # ----------------------------
       # Install test + style deps
       # ----------------------------
-      - name: Install Test Dependencies
+      - name: Install Python Dependencies
         run: |
-          pip install pytest pytest-cov pytest-xdist pytest-timeout
-          pip install black flake8 isort mypy
+          pip install tvm pytest pytest-cov pytest-xdist pytest-timeout black flake8 isort mypy
 
       # ----------------------------
       # Run Python Integration Tests
@@ -153,7 +152,7 @@ jobs:
         if: matrix.test-suite == 'integration'
         run: |
           echo "Running integration tests..."
-          pytest tests/python/conftest.py \
+          pytest tests/python/integration \
             -v \
             --disable-warnings \
             --timeout=600 \
