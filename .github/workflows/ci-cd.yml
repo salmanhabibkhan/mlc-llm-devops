@@ -83,7 +83,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -114,7 +114,7 @@ jobs:
           - style
 
     container:
-      image: ${{ needs.build-docker-image.outputs.image_tag || 'ghcr.io/${{ github.repository }}/mlc-llm-dev:latest' }}
+      image: ghcr.io/${{ github.repository }}/mlc-llm-dev:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
