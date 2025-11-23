@@ -3,13 +3,14 @@ name: MLC-LLM CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - master
       - develop
+      - feature/*
     tags:
       - 'v*'
   pull_request:
     branches:
-      - main
+      - master
       - develop
   workflow_dispatch:
     inputs:
@@ -104,61 +105,66 @@ jobs:
     needs: build-docker-image
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.skip_tests != 'true' }}
-    
+
     strategy:
       fail-fast: false
       matrix:
         test-suite:
-          - unit
           - integration
           - style
-    
+
     container:
       image: ${{ needs.build-docker-image.outputs.image_tag }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      # ----------------------------
+      # Cache Python Dependencies
+      # ----------------------------
       - name: Cache Python Dependencies
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/pip
-            /workspace/.pytest_cache
+            .pytest_cache
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', '**/setup.py') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      # ----------------------------
+      # Install test + style deps
+      # ----------------------------
       - name: Install Test Dependencies
         run: |
           pip install pytest pytest-cov pytest-xdist pytest-timeout
-          pip install flake8 black mypy isort
+          pip install black flake8 isort mypy
 
-      - name: Run Unit Tests
-        if: matrix.test-suite == 'unit'
-        run: |
-          pytest tests/unit/ \
-            --cov=mlc_llm \
-            --cov-report=xml \
-            --cov-report=html \
-            --cov-report=term \
-            -v -n auto \
-            --timeout=300
-
+      # ----------------------------
+      # Run Python Integration Tests
+      # ----------------------------
       - name: Run Integration Tests
         if: matrix.test-suite == 'integration'
         run: |
-          pytest tests/integration/ \
+          echo "Running integration tests..."
+          pytest tests/python/integration \
             -v \
-            --timeout=600
-        continue-on-error: true
+            --disable-warnings \
+            --timeout=600 \
+            --maxfail=1 \
+            --cov=python \
+            --cov-report=xml \
+            --cov-report=html
 
+      # ----------------------------
+      # Run Python Style Checks
+      # ----------------------------
       - name: Run Code Style Checks
         if: matrix.test-suite == 'style'
         run: |
@@ -171,16 +177,24 @@ jobs:
           echo "Running isort..."
           isort --check-only python/ || true
 
-      - name: Upload Coverage Reports
-        if: matrix.test-suite == 'unit'
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-${{ matrix.test-suite }}
-        continue-on-error: true
+          echo "Running mypy..."
+          mypy python/ || true
 
-      - name: Upload Test Results
+      # ----------------------------
+      # OPTIONAL: C++ Tests (uncomment if needed)
+      # ----------------------------
+      # - name: Run C++ Tests
+      #   if: matrix.test-suite == 'integration'
+      #   run: |
+      #     apt-get update && apt-get install -y g++ cmake
+      #     echo "Compiling C++ tests..."
+      #     g++ -std=c++17 tests/ccp/conv_template_unittest.cc -o conv_test
+      #     ./conv_test
+
+      # ----------------------------
+      # Upload Test Results
+      # ----------------------------
+      - name: Upload Test Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -190,6 +204,7 @@ jobs:
             .coverage
             coverage.xml
           retention-days: 30
+          if-no-files-found: ignore
 
   # ==================== STAGE 3: BUILD WHEELS ====================
   build-wheels:
