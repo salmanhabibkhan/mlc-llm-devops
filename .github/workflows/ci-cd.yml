@@ -222,6 +222,11 @@ jobs:
         python-version: ['3.11']
 
     steps:
+
+      - name: Disable CRLF conversion
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+        shell: bash
       - name: Clone OFFICIAL MLC-LLM Repo
         run: |
           git clone --recursive https://github.com/mlc-ai/mlc-llm.git mlc-official
@@ -282,8 +287,8 @@ jobs:
         shell: powershell
         run: |
           cd mlc-official
-          mkdir build
-          cd build
+          mkdir build-window
+          cd build-window
           $input = "`nN`nN`nN`nN`nN`nN`nN"
           $input | python ..\cmake\gen_cmake_config.py
 
@@ -298,19 +303,13 @@ jobs:
             -DUSE_OPENCL=OFF \
             -DUSE_VULKAN=ON
           cmake --build . --parallel $(nproc)
-
-      - name: Disable CRLF conversion
-        if: runner.os == 'Windows'
-        run: git config --global core.autocrlf false
-        shell: bash
-
       - name: Configure MLC (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           cd mlc-official
-          if (!(Test-Path build)) { mkdir build }
-          cd build
+          if (!(Test-Path build-window)) { mkdir build-window }
+          cd build-window
           cmake .. -G Ninja `
             -DTVM_SOURCE_DIR=../3rdparty/tvm `
             -DUSE_CUDA=OFF `
@@ -324,7 +323,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          cd mlc-official/build
+          cd mlc-official/build-window
           cmake --build . --parallel $env:NUMBER_OF_PROCESSORS
 
       # ---------- Build Python wheels ----------
