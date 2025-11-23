@@ -279,14 +279,14 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          python ../cmake/gen_cmake_config.py
+          echo -e "\nY\nN\nN\nY\nN" | python ../cmake/gen_cmake_config.py
 
       - name: Generate CMake Configuration (Windows)
         if: runner.os == 'Windows'
         run: |
           mkdir -p build
           cd build
-          python ..\cmake\gen_cmake_config.py
+          echo -e "\nN\nN\nN\nN\nN" | python ../cmake/gen_cmake_config.py
         shell: powershell
 
       - name: Build MLC-LLM Libraries (Linux)
