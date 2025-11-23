@@ -299,16 +299,32 @@ jobs:
             -DUSE_VULKAN=ON
           cmake --build . --parallel $(nproc)
 
+      - name: Disable CRLF conversion
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+        shell: bash
+
+      - name: Configure MLC (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          cd mlc-official
+          mkdir build
+          cd build
+          cmake .. -G Ninja `
+            -DTVM_SOURCE_DIR=../3rdparty/tvm `
+            -DUSE_CUDA=OFF `
+            -DUSE_ROCM=OFF `
+            -DUSE_OPENCL=OFF `
+            -DUSE_VULKAN=OFF `
+            -DUSE_METAL=OFF `
+            -DCMAKE_BUILD_TYPE=Release
+
       - name: Build MLC-LLM Libraries (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           cd mlc-official/build
-          cmake .. -G Ninja `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DUSE_CUDA=OFF `
-            -DUSE_OPENCL=OFF `
-            -DUSE_VULKAN=ON
           cmake --build . --parallel $env:NUMBER_OF_PROCESSORS
 
       # ---------- Build Python wheels ----------
