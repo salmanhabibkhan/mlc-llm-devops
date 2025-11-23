@@ -114,7 +114,7 @@ jobs:
           - style
 
     container:
-      image: ${{ needs.build-docker-image.outputs.image_tag }}
+      image: ${{ needs.build-docker-image.outputs.image_tag || 'ghcr.io/${{ github.repository }}/mlc-llm-dev:latest' }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
