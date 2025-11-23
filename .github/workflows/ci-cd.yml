@@ -309,7 +309,7 @@ jobs:
         shell: powershell
         run: |
           cd mlc-official
-          mkdir build
+          if (!(Test-Path build)) { mkdir build }
           cd build
           cmake .. -G Ninja `
             -DTVM_SOURCE_DIR=../3rdparty/tvm `
