@@ -153,7 +153,7 @@ jobs:
         if: matrix.test-suite == 'integration'
         run: |
           echo "Running integration tests..."
-          pytest tests/python/integration \
+          pytest tests/python/conftest.py \
             -v \
             --disable-warnings \
             --timeout=600 \
