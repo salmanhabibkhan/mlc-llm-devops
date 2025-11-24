@@ -304,8 +304,12 @@ jobs:
           cd mlc-official
           if (-Not (Test-Path build)) { mkdir build }
           cd build
-          $input = "`nN`nN`nN`nN`nN`nN`nN'"
-          $input | python ..\cmake\gen_cmake_config.py || Write-Host "Ignore interactive config errors"
+          $input = "`nN`nN`nN`nN`nN`nN`nN"
+          try {
+              $input | python ..\cmake\gen_cmake_config.py
+          } catch {
+              Write-Host "Ignore interactive config errors"
+          }
 
       # ----------------------------
       # Build MLC-LLM libraries
