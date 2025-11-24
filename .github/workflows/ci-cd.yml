@@ -254,7 +254,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          choco install cmake --version=3.28.1 --installargs 'ADD_CMAKE_TO_PATH=System' -y
           choco install ninja git-lfs -y
           git lfs install
     
