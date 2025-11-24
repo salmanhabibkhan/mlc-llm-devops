@@ -342,7 +342,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DUSE_CUDA=OFF `
             -DUSE_OPENCL=OFF `
-            -DUSE_VULKAN=ON
+            -DUSE_VULKAN=OFF
           cmake --build . --parallel $env:NUMBER_OF_PROCESSORS
           Write-Host "Windows build may not produce working wheel. Continue pipeline."
 
