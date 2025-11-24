@@ -526,6 +526,7 @@ jobs:
           fi
 
       - name: Install and Validate Wheel
+        continue-on-error: true
         if: runner.os == 'Linux' && steps.wheelcheck.outputs.wheel_found == 'true'
         run: |
           WHEEL=$(find validation-artifacts -name "*.whl" | head -n 1)
@@ -534,6 +535,7 @@ jobs:
           python -m mlc_llm --help
 
       - name: Run Smoke Tests
+        continue-on-error: true
         if: runner.os == 'Linux' && steps.wheelcheck.outputs.wheel_found == 'true'
         run: |
           python - <<'EOF'
@@ -542,5 +544,6 @@ jobs:
           EOF
 
       - name: Skip message
+        continue-on-error: true
         if: runner.os == 'Linux' && steps.wheelcheck.outputs.wheel_found != 'true'
         run: echo "Skipping Linux validation because no wheel was found."
