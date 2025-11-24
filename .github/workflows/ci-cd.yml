@@ -257,6 +257,19 @@ jobs:
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
           choco install ninja git-lfs -y
           git lfs install
+    
+              # ----------------------------
+    # Fix UTF-8 BOM in all CMakeLists.txt (Windows only)
+    # ----------------------------
+      - name: Fix UTF-8 BOM Issues
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Get-ChildItem -Recurse -Filter "CMakeLists.txt" | ForEach-Object {
+            $raw = Get-Content $_.FullName -Raw
+            $clean = $raw -replace "^\uFEFF", ""
+            Set-Content -Path $_.FullName -Value $clean -Encoding UTF8
+          }
 
       # ----------------------------
       # Install Rust Toolchain
@@ -304,12 +317,10 @@ jobs:
           cd mlc-official
           if (-Not (Test-Path build)) { mkdir build }
           cd build
-          $input = "`nN`nN`nN`nN`nN`nN`nN"
-          try {
-              $input | python ..\cmake\gen_cmake_config.py
-          } catch {
-              Write-Host "Ignore interactive config errors"
-          }
+
+          $options = @("N","N","N","N","N","N","N")
+          $options -join "`n" | Out-String | python ..\cmake\gen_cmake_config.py
+
 
       # ----------------------------
       # Build MLC-LLM libraries
@@ -375,7 +386,6 @@ jobs:
           path: mlc-official/dist/*.whl
           retention-days: 90
           if-no-files-found: warn
-
 
   # ==================== STAGE 4: CREATE GITHUB RELEASE ====================
   create-release:
