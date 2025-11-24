@@ -355,7 +355,18 @@ jobs:
       # ----------------------------
       # List Wheels (cross-platform)
       # ----------------------------
-      - name: List Wheels
+      - name: List Wheels (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          DIST_DIR="mlc-official/dist"
+          if [ -d "$DIST_DIR" ]; then
+              ls -lh "$DIST_DIR"
+          else
+              echo "No wheels found"
+          fi
+
+      - name: List Wheels (Windows)
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
           $distPath = "mlc-official\dist"
@@ -364,7 +375,6 @@ jobs:
           } else {
               Write-Host "No wheels found"
           }
-
       # ----------------------------
       # Upload Wheel Artifacts
       # ----------------------------
