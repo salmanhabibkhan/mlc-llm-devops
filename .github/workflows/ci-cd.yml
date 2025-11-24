@@ -317,10 +317,7 @@ jobs:
           cd mlc-official
           if (-Not (Test-Path build)) { mkdir build }
           cd build
-
-          $options = @("N","N","N","N","N","N","N")
-          $options -join "`n" | Out-String | python ..\cmake\gen_cmake_config.py
-
+          Write-Host "Skipping gen_cmake_config.py on Windows to avoid BOM issues"
 
       # ----------------------------
       # Build MLC-LLM libraries
