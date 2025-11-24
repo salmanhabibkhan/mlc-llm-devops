@@ -354,13 +354,20 @@ jobs:
       # Build Python wheel
       # ----------------------------
       - name: Build Python Wheel
-        shell: powershell
+        if: runner.os == 'Linux'
         run: |
           cd mlc-official/python
-          try {
+          python -m build --wheel --outdir ../dist/ || echo "Wheel build failed but continuing"
+
+      - name: Build Python Wheel (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          if (Test-Path "../build/mlc_llm.dll") {
+              cd mlc-official/python
               python -m build --wheel --outdir ../dist/
-          } catch {
-              Write-Host "Wheel build failed, continuing anyway..."
+          } else {
+              Write-Host "mlc_llm.dll not found, skipping wheel build"
           }
 
       - name: Repair Wheel (Linux only)
