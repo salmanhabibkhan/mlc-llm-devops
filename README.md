@@ -97,7 +97,7 @@ This repository provides a **complete DevOps solution** for MLC-LLM (Machine Lea
 
 ```bash
 # 1. Clone this repository
-git clone https://github.com/YOUR_ORG/mlc-llm-devops.git
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git
 cd mlc-llm-devops
 
 # 2. Build Docker image for your architecture
@@ -133,11 +133,11 @@ For **Apple Silicon Mac** users to get Metal GPU acceleration:
 brew install cmake ninja git git-lfs python@3.11 rust
 
 # 2. Clone MLC-LLM
-git clone --recursive https://github.com/mlc-ai/mlc-llm.git
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git
 cd mlc-llm
 
 # 3. Copy build script from this repo
-curl -O https://raw.githubusercontent.com/YOUR_ORG/mlc-llm-devops/main/scripts/build-mlc.sh
+curl -O https://github.com/salmanhabibkhan/mlc-llm-devops/main/scripts/build-mlc.sh
 chmod +x build-mlc.sh
 
 # 4. Build (auto-enables Metal for GPU)
@@ -204,7 +204,7 @@ bash /workspace/scripts/build-mlc.sh
 
 # Native (Recommended - Metal GPU)
 brew install cmake ninja git rust python@3.11
-git clone --recursive https://github.com/mlc-ai/mlc-llm.git
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git
 cd mlc-llm && bash build-mlc.sh
 ```
 
@@ -260,7 +260,7 @@ docker build --platform linux/arm64 -t mlc-llm-dev:local .
 docker buildx create --use
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  --tag ghcr.io/YOUR_ORG/mlc-llm-dev:latest \
+  --tag ghcr.io/salmanhabibkhan/mlc-llm-dev:latest \
   --push \
   .
 ```
@@ -308,7 +308,7 @@ docker-compose up -d mlc-dev
 docker-compose exec mlc-dev bash
 
 # Inside container
-git clone --recursive https://github.com/mlc-ai/mlc-llm.git .
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git .
 bash scripts/build-mlc.sh
 
 # Stop when done
@@ -380,8 +380,8 @@ docker-compose down
 
 | Event | Trigger | Behavior |
 |-------|---------|----------|
-| **Push to `main`** | Automatic | Full pipeline, no release |
-| **Pull Request** | Automatic | Build + Test only |
+| **Push to `master`** | Automatic | Full pipeline, no release |
+| **Pull Request** | Automatic | Build + Test only | In progress Now
 | **Tag `v*`** | Automatic | Full pipeline + GitHub Release |
 | **Manual** | Via Actions UI | Configurable options |
 
@@ -411,7 +411,7 @@ Key features:
 
 4. **Push code** to trigger first run:
 ```bash
-git push origin main
+git push origin master
 ```
 
 5. **Create release** (optional):
@@ -428,7 +428,7 @@ git push origin v0.1.0
 ### Pipeline Outputs
 
 After successful pipeline:
-- **Docker Image**: `ghcr.io/YOUR_ORG/mlc-llm-dev:latest`
+- **Docker Image**: `ghcr.io/salmanhabibkhan/mlc-llm-dev:latest`
 - **Linux Wheel**: `mlc_llm-*-linux_x86_64.whl`
 - **Windows Wheel**: `mlc_llm-*-win_amd64.whl`
 - **Test Reports**: Coverage and test results
@@ -471,7 +471,7 @@ If you need to build manually:
 
 ```bash
 # 1. Clone MLC-LLM
-git clone --recursive https://github.com/mlc-ai/mlc-llm.git
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git
 cd mlc-llm
 
 # 2. Create build directory
@@ -634,7 +634,7 @@ strategy:
 # Change triggers
 on:
   push:
-    branches: [main, develop, staging]
+    branches: [master, develop, staging]
     paths:
       - 'src/**'
       - 'CMakeLists.txt'
@@ -720,8 +720,8 @@ sudo chown -R $USER:$USER ./build
 ```bash
 # Use native build instead
 brew install cmake ninja git rust python@3.11
-git clone --recursive https://github.com/mlc-ai/mlc-llm.git
-cd mlc-llm && bash build-mlc.sh
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git
+cd mlc-llm-devops && bash build-mlc.sh
 ```
 
 ### Getting Help
@@ -737,8 +737,6 @@ cd mlc-llm && bash build-mlc.sh
    cmake --build . --verbose
    export VERBOSE=1
    ```
-4. **Create issue**: [GitHub Issues](https://github.com/YOUR_ORG/mlc-llm-devops/issues)
-
 ---
 
 ## 🤝 Contributing
@@ -757,7 +755,7 @@ Contributions are welcome! Please follow these steps:
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_ORG/mlc-llm-devops.git
+git clone --recursive https://github.com/salmanhabibkhan/mlc-llm-devops.git
 cd mlc-llm-devops
 
 # Run setup script
@@ -772,13 +770,6 @@ pytest tests/ -v
 # Build Docker image
 docker build -t mlc-llm-dev:test .
 ```
-
----
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
 ---
 
 ## 🙏 Acknowledgments
@@ -791,8 +782,6 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## 📞 Support
 
 - **Documentation**: See `docs/COMPLETE_GUIDE.md` for detailed information
-- **Issues**: [GitHub Issues](https://github.com/YOUR_ORG/mlc-llm-devops/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_ORG/mlc-llm-devops/discussions)
 
 ---
 
@@ -812,4 +801,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 **Quick Links**:
 - [Complete Documentation](docs/COMPLETE_GUIDE.md)
 - [GitHub Actions Workflow](.github/workflows/ci-cd.yml)
-- [MLC-LLM Repository](https://github.com/mlc-ai/mlc-llm)
+- [Original Repo MLC-LLM Repository](https://github.com/mlc-ai/mlc-llm)
