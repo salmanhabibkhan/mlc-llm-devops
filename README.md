@@ -781,7 +781,7 @@ docker build -t mlc-llm-dev:test .
 
 ## 📞 Support
 
-- **Documentation**: See `docs/COMPLETE_GUIDE.md` for detailed information
+- **Documentation**: See `docs/COMPLETE_GUIDE.md` for detailed information is in progress
 
 ---
 
@@ -799,6 +799,5 @@ docker build -t mlc-llm-dev:test .
 ---
 
 **Quick Links**:
-- [Complete Documentation](docs/COMPLETE_GUIDE.md)
 - [GitHub Actions Workflow](.github/workflows/ci-cd.yml)
 - [Original Repo MLC-LLM Repository](https://github.com/mlc-ai/mlc-llm)
