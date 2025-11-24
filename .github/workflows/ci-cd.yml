@@ -341,17 +341,20 @@ jobs:
               Write-Host "mlc_llm.dll not found, skipping wheel build"
           }
 
+      # - name: Repair Wheel (Linux only)
+      #   if: runner.os == 'Linux'
+      #   run: |
+      #     cd mlc-official
+      #     python -m pip install auditwheel patchelf
+      #     if [ -d dist/repaired ]; then rm -rf dist/repaired; fi
+      #     auditwheel repair dist/*.whl --plat manylinux_2_35_x86_64 -w dist/repaired/ || true
+      #     rm -f dist/*.whl || true
+      #     mv dist/repaired/*.whl dist/ || true
+      #   continue-on-error: true
       - name: Repair Wheel (Linux only)
         if: runner.os == 'Linux'
         run: |
-          cd mlc-official
-          python -m pip install auditwheel patchelf
-          if [ -d dist/repaired ]; then rm -rf dist/repaired; fi
-          auditwheel repair dist/*.whl --plat manylinux_2_35_x86_64 -w dist/repaired/ || true
-          rm -f dist/*.whl || true
-          mv dist/repaired/*.whl dist/ || true
-        continue-on-error: true
-
+          echo "Skipping auditwheel repair due to toolchain incompatibility"
       # ----------------------------
       # List Wheels (cross-platform)
       # ----------------------------
@@ -378,10 +381,18 @@ jobs:
       # ----------------------------
       # Upload Wheel Artifacts
       # ----------------------------
-      - name: Upload Wheel Artifacts
+      # - name: Upload Wheel Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+      #     path: mlc-official/dist/*.whl
+      #     retention-days: 90
+      #     if-no-files-found: warn
+      - name: Upload Original Wheel
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+          name: wheels-linux-py${{ matrix.python-version }}
           path: mlc-official/dist/*.whl
           retention-days: 90
           if-no-files-found: warn
