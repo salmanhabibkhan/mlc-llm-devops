@@ -1,0 +1,38 @@
+name: Publish Release
+
+on:
+  workflow_call:
+    inputs:
+      release_name:
+        required: false
+        type: string
+      tag:
+        required: false
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/wheels
+
+      - name: Download Docker metadata
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/docker
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ inputs.release_name || github.ref_name }}
+          files: |
+            artifacts/wheels/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

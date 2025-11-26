@@ -1,0 +1,25 @@
+name: Docker Build & Push
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: false
+        type: string
+        default: "mlc-llm"
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}:latest .
+
+      - name: Push
+        run: docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}:latest
