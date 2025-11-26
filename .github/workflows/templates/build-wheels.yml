@@ -1,0 +1,45 @@
+name: Build Wheels
+on:
+  workflow_call:
+
+jobs:
+  wheels:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: sudo apt-get install -y ninja-build build-essential cmake git-lfs libzstd-dev
+
+      - name: Clone MLC
+        run: |
+          git clone --recursive https://github.com/mlc-ai/mlc-llm mlc-official
+
+      - name: Build C++ libs
+        run: |
+          cd mlc-official
+          mkdir build && cd build
+          cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release
+          ninja
+
+      - name: Build Python wheel
+        run: |
+          cd mlc-official/python
+          python -m build --wheel --outdir ../dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux
+          path: mlc-official/dist/*.whl

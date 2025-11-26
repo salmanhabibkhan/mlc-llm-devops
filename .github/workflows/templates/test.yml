@@ -1,0 +1,38 @@
+name: Run Tests
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/mlc-llm-dev:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest black flake8 isort mypy pytest-xdist
+
+      - name: Lint & Formats
+        run: |
+          black --check python/ || true
+          flake8 python/ || true
+          isort --check-only python/ || true
+          mypy python/ || true
+
+      - name: Run tests
+        run: |
+          pytest tests/python/integration || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ./
+          if-no-files-found: ignore

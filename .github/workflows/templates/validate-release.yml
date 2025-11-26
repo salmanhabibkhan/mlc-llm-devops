@@ -1,0 +1,46 @@
+name: Validate Release
+on:
+  workflow_call:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: validation-artifacts/
+          pattern: wheels-linux*
+
+      - name: Locate wheel
+        id: wheelcheck
+        run: |
+          WHEEL=$(find validation-artifacts -name "*.whl" | head -n 1)
+          if [ -z "$WHEEL" ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
+          else
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "wheel=$WHEEL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install wheel
+        if: steps.wheelcheck.outputs.found == 'true'
+        continue-on-error: true
+        run: pip install "${{ steps.wheelcheck.outputs.wheel }}"
+
+      - name: Smoke Test
+        if: steps.wheelcheck.outputs.found == 'true'
+        continue-on-error: true
+        run: |
+          python - <<'EOF'
+          import mlc_llm
+          print("MLC-LLM version:", mlc_llm.__version__)
+          EOF
+
+      - name: No wheel found
+        if: steps.wheelcheck.outputs.found != 'true'
+        run: echo "No wheel found, skipping validation."

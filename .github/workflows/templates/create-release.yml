@@ -1,0 +1,28 @@
+name: Create Release
+on:
+  workflow_call:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts/
+          pattern: wheels-*
+
+      - name: Prepare release assets
+        run: |
+          mkdir release-dist
+          cp release-artifacts/**/*.whl release-dist/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-dist/*
+          body: |
+            ## MLC-LLM Release ${{ github.ref_name }}
+            Linux wheel included.
